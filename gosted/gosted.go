@@ -1,4 +1,4 @@
-package main
+package gosted
 
 import (
 	"encoding/json"
@@ -27,6 +27,12 @@ import (
 // in Rust traits are dynamic sized types and must be on the heap behind a pointer, they can be used as method param like: para: impl Trait, return type like: -> impl Trait, bound generic to them like: F: FnMut() -> () or box them like: Box<dyn Trait> in case we don't know the implementor
 // in Go interfaces are types and can be used directly in every where
 // in Rust unlike Go when an interface or trait is defined for a type it supports both pointer and the type itself
+// in Rust structs can be object with methods using impl Struct{} or extend their behaviour using traits in both we can have self.nethod() or Struct::method()
+// in Go struct can be object but their methods must be implemented using interface{} or anonym func with absence of interface{}
+// in Rust passing heap data into new scopes will move and drop their ownership out of the ram and transfer the value into a new ownership in that scope, we can pass by ref or clone them
+// in Go everything is passed by value which makes a copy of data causes the allocated section in the heap get larger which reduces the speed of gc cacher
+// in Rust once a fuction gets executed all its internal variables gets dropped out of the ram that's why we can't return a pointer to them from the function since Rust don't allow to have dnagled pointer
+// in Rust passing a heap data into a function moves its ownership into the function scope and that's why we don't have access the type after moving
 
 // there is no concept of immutable and mutable pointers and their restrictions in Go
 // so every pointer type would be defined like `var p *User` and initialize like p = &User{Name: "erfan"}
@@ -80,9 +86,12 @@ type PointertoInt *int
 type Num int
 type PointertoNum *Num
 
-type Text = string
 type Number = uint8
 type Fn = func(int) (Num int)
+
+type String struct {
+	Content string
+}
 
 func log() {
 
@@ -220,6 +229,7 @@ func main() {
 	/////////////// ----------------------------------------
 	/////////////// interfaces and traits
 	/////////////// ----------------------------------------
+	// extending struct behaviour can be done by implementing interface methods for its pointers or none pointers separately
 	// ----------------------------------------
 	/* 	  Rust trait and interface example
 	// ----------------------------------------
@@ -336,6 +346,69 @@ func main() {
 	// inside the interface{}, to specify the exact type of interface{} we can use type assertion
 	var _ interface{} = player
 
+	names := []string{"wildonion", "erfan"} // slice of names
+	// converting each name into interface
+	// in Go, you cannot directly assign a pointer to one type to a pointer of another type, even if the underlying types are related.
+	// since interface{} is a pointer to underlying type and also &name is a pointer to
+	interfaces_names := make([]interface{}, len(names))
+	for i, n := range names {
+		// name := interface{}(n) // making n as interface
+		interfaces_names[i] = n
+	}
+
+	// ***********************************************
+	// ******** impl String{} to impl methods ********
+	// note that interfaces can have any underlying type, later we can do type assertion to check the type
+	// if we want to add methods for a type and call it by . on the instance
+	// we should use interface{} in Rust it's like calling extra methods on
+	// the object other than the ones that already supported by the struct
+	// itself which can be done using traits
+	var pointerString *String = &String{Content: "wildonion"}
+	var stringinterface interface {
+		getContent() *string // impl method for String struct only so the value can't be simple and builtin string
+	} = pointerString // implementing the interface for the pointer instance of String it's like impl Interface for Struct{} in Rust
+
+	get_cont := pointerString.getContent()
+	println(get_cont)
+	if cont, ok := stringinterface.(*String); ok { // if let Ok() = String{}
+		println(cont.Content)
+	}
+	// another example
+	// dead simple trait interface
+	type AnotherInterface = interface {
+		getContent() *string
+		receievData([]*byte) *String // []*byte is &mut [u8] in Rust
+	}
+	var structpoiner *String
+	structpoiner = &String{Content: "erfan"}
+	stringinstance := String{Content: "harchi"}
+	// When you call a method with a pointer receiver on a non-pointer instance, Go automatically takes the address of the non-pointer instance before calling the method.
+	// Similarly, when you call a method with a pointer receiver on a pointer instance, Go automatically dereferences the pointer before calling the method.
+	stringinstance.getContent()
+	structpoiner.getContent()
+
+	// in place initialization of interface
+	// trait := interface {
+	// }(structpoiner)
+
+	var inter interface{} = "wildonion" // interfaces can have any underlying type in this case is string
+	println(inter)                      // address of inter
+
+	// functions that return interface{} values tend to be quite annoying,
+	// and as a rule of thumb you can just remember that it’s typically better
+	// to take in an interface{} value as a parameter than it is to return an interface{} value
+	// fn return_interface<'valid>(interfaces: &'valid [&'valid dyn Interfaces]) -> &'valid dyn Interface{
+	// 		trait Interface{}
+	// 		let interfaces: &[&dyn Interface]; // since the size of trait is not known (is ?Sized) it must be behind &dyn
+	// }
+	// anonym function is like closure in Rust:
+	// let anonym = (|pid: u8|{
+	// 	String::from("")
+	// })(0);
+	_ = func(in []interface{}) (inter interface{}) {
+		return in[0]
+	}(interfaces_names)
+
 	// slice of MyInterface types or those types that MyInterface methods
 	// are implemented for them like Player struct it's like all structs
 	// that implements MyInterface trait in Rust or in other words slice
@@ -398,6 +471,23 @@ func main() {
 /////////////// ----------------------------------------
 /////////////// methods
 /////////////// ----------------------------------------
+
+// seems we can't extend the methods of built in type string
+func (s *String) getContent() *string {
+	return &s.Content // return reference to the content if the type is already ref (*String) don't need to use &
+}
+
+// we would do normaly this in Rust:
+// type Condition<T> = fn(T) -> bool;
+// fn filter<T: IntoIterator<Item=T>>(slice: &[T], condition: Condition<T>) -> Vec<T>{ todo!() }
+func filter[O any](arr []*O, condition func(*O) bool) (res []*O) {
+	for _, v := range arr {
+		if result := condition(v); result { // in Rust => if let Ok(res) = condition(&v){}
+			res = append(res, v)
+		}
+	}
+	return
+}
 
 func f2(arg *int) (int, error) { // it's like Box<dyn Error> the Error() method must be implemented for the CustomError
 	if *arg == 43 { // arg is reference we should deref it to compare
@@ -663,7 +753,7 @@ func NewPlayingCardDeck() *Deck {
 	return deck
 }
 
-// with interface we can define multiple methods with each of
+// with interface we can define multiple methods each of
 // with different signatutes that is callable on any instance
 // of the type that has been passed to the interface method
 // this way is kinda simulating the generics
