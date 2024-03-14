@@ -1,6 +1,7 @@
 package main
 
 // networking: http, go, arc, mutex, channels, tcp, actor rpc
+// wait group it's like await in rust
 // generators, type approximation, ltg
 // ...
 // impl.go -> all traits and models impls
@@ -13,10 +14,6 @@ package main
 // https://medium.com/@gauravsingharoy/asynchronous-programming-with-go-546b96cd50c1
 // https://levelup.gitconnected.com/use-go-channels-as-promises-and-async-await-ee62d93078ec#:~:text=To%20declare%20an%20%E2%80%9Casync%E2%80%9D%20function,logic%20inside%20that%20anonymous%20function.
 // https://gobyexample.com/goroutines
-
-type User struct {
-	Name string
-}
 
 func main() {
 
