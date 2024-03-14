@@ -226,6 +226,17 @@ func main() {
 	name := "0x4F"
 	println([]byte(name))
 
+	// var num0 int = 1
+	// var num1 int = int(1)
+	// var num2 int
+	// num2 = 1
+	// var num3 = 1
+	// var inter0 interface{} = ""
+	// var inter1 interface{}
+	// inter1 = ""
+	// var inter2 interface{} = interface{}("")
+	// var inter3 interface{} = ""
+
 	/////////////// ----------------------------------------
 	/////////////// interfaces and traits
 	/////////////// ----------------------------------------
