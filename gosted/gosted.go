@@ -237,6 +237,11 @@ func main() {
 	// var inter2 interface{} = interface{}("")
 	// var inter3 interface{} = ""
 
+	// in place building and calling
+	go func(msg string) *string {
+		return &msg
+	}("")
+
 	/////////////// ----------------------------------------
 	/////////////// interfaces and traits
 	/////////////// ----------------------------------------
