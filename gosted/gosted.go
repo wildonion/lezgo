@@ -435,6 +435,12 @@ func main() {
 	// are not exactly a type they're kinda dynamic types
 	interfaces := []MyInterface{player}
 	print(interfaces)
+
+	var goodTrait interface {
+		getPlayerName(code *string) *string
+	} = &User{Name: "onion"} // goodTrait now is of type User pointer cause the user pointer it's bound to the interface
+	println("implemented goodTrait for user pointer", goodTrait)
+
 	// since all types implements interface{} type thus we can pass any type to
 	// the method which has func Method(v interface{}) signature cause later we
 	// can cast the type into the actual data that implements the interface method
@@ -487,6 +493,14 @@ func main() {
 /////////////// ----------------------------------------
 /////////////// methods
 /////////////// ----------------------------------------
+
+func setName[C any](name *C) (Response C) {
+	return *name
+}
+
+func (p *User) getPlayerName(nickname *string) *string {
+	return &p.Name
+}
 
 // seems we can't extend the methods of built in type string
 func (s *String) getContent() *string {
@@ -599,20 +613,9 @@ func update_user(user *User) (Response *User) {
 	// of User instance which is unchanged, the reason is that we're putting a new User object
 	// inside the user pointer inside the method which by executing the function the pointer
 	// gets poped out of the stack and the outside instance remains the same, it's like binding
-	// a new instance into an existing mutable pointer without dereferencing it like:
-	// let mut user = User::default();
-	// let mut mutpointer = &mut user;
-	// let mut user1 = User::default();
-	// mutpointer = &mut user1;
-	// or
-	// let name = String::from("");
-	// let mut pname = &name;
-	// let mut anotehr_pname = &String::from("new content");
-	// println!("pname points to location of name : {:p}", pname);
-	// println!("anotehr_pname points to location of name : {:p}", anotehr_pname);
-	// pname = anotehr_pname;
-	// println!("pname points to location of anotehr_pname : {:p}", pname);
-	// println!("pname content : {:?}", pname);
+	// a new instance into an existing mutable pointer without dereferencing, in Rust if we want
+	// to mutate the user pointer inside the function it must be of type &mut User we can't normally
+	// change the user pointer of type user: &User with something like this:
 	user = &User{Name: "erfan2", Age: 0, isAdmin: false} // outside of this method instance won't change
 
 	println("user instance address using Response pointer", Response)
@@ -636,8 +639,21 @@ func update_user1(user *User) {
 	// let mut new_binding = User{name: String::from("wildonion")};
 	// *mutpointer = &mut new_binding; // user has changed too
 	// mutpointer.Name = String::from("only Name field"); // changing only name field
+	/*
+		let mut name = String::from("wildonion"); // the pointee
+		let mut mutpname = &mut name; // points to the location of name contains the name value
+		// changing underlying data same adderess
+		println!("mutpname pointer points to : {:p}", mutpname);
+		*mutpname = String::from("wildonion"); // dereferencing it only update the undelrying data not the address
+		println!("mutpname pointer points to : {:p}", mutpname); // mutpname still contains the address of the very first name variable but the value has changed
+
+		// changing both address and underlying data
+		let mut new_binding = String::from("onion");
+		mutpname = &mut new_binding;
+		println!("[CHANGED ADDR] mutpname pointer points to : {:p}", mutpname); // mutpname now contains completely a new value binding accordingly new location of the new binding
+	*/
 	println("user pointer address itself", &user)
-	*user = User{Name: "erfan", Age: 0, isAdmin: false} // mutating the pointer with a new binding this will change the whole instance of underlying data
+	*user = User{Name: "erfan", Age: 0, isAdmin: false} // mutating the pointer with a new binding this will change the whole instance of underlying data outside of the function
 	println("user pointer address itself", &user)
 	return
 }
