@@ -5,7 +5,6 @@ import (
 )
 
 // networking: http, go, arc, mutex, channels, tcp, actor rpc, p2p
-// generators, type approximation, ltg
 // ...
 // impl.go -> all traits and models impls
 // traits.go -> interfaces
@@ -24,9 +23,16 @@ type Person struct {
 	Name string
 }
 
+type ByteSeq = []byte
 type Trait = interface {
-	// interface methods go here
+	// interface methods and types go here
 	// ...
+	// ~[]byte
+	getCode()
+	sayHello()
+}
+type Trait2 interface {
+	~[]byte
 }
 
 func main() {
@@ -36,6 +42,8 @@ func main() {
 	// struct Struct{}
 	// impl Trait for Struct{}
 
+	var _ = ByteSeq("")
+
 	var _ Trait = person // Trait interface is now of type person or person is bouded to Trait interface
 
 	person.getName()
@@ -44,6 +52,16 @@ func main() {
 	println("built user %s", user)
 }
 
+// impl for the struct itself
 func (p Person) getName() string {
 	return p.Name
+}
+
+// trait impls
+func (p Person) getCode() {
+
+}
+
+func (p Person) sayHello() {
+
 }
