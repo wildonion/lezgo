@@ -1,9 +1,5 @@
 package main
 
-import (
-	"../gosted"
-)
-
 // networking: http, go, arc, mutex, channels, tcp, actor rpc, p2p
 // ...
 // impl.go -> all traits and models impls
@@ -48,8 +44,29 @@ func main() {
 
 	person.getName()
 
-	user := gosted.User{Name: "Erfan", Age: 28}
-	println("built user %s", user)
+	// user := gosted.User{Name: "Erfan", Age: 28}
+	// println("built user %s", user)
+
+	// function must be defer to recover the panic since it must be the
+	// last function that is being executed which recovers the last panic
+	defer func() {
+		if r := recover(); r != nil {
+			println("recover")
+		}
+	}() // building and calling at the same time
+
+	Anothermypanic()
+
+	mypanic()
+
+}
+
+func mypanic() {
+	panic("i panicked")
+}
+
+func Anothermypanic() {
+	panic("i another panicked")
 }
 
 // impl for the struct itself
