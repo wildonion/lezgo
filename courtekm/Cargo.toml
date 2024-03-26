@@ -1,0 +1,37 @@
+[package]
+name = "courtokm"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+
+[dependencies]
+rand = "0.8"
+serde_json = "1"
+serde = {version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+rand_chacha = "0.3"
+wallexerr = "0.3.2"
+futures-util = "0.3"
+rayon = "1"
+uuid = { version = "1", features = ["serde", "v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+log = "0.4"
+dotenv = "0.15"
+pretty_env_logger = "0.4.0"
+log4rs = "1.2.0"
+env_logger = "0.10.0"
+bytes = { version = "1", features = ["serde"] }
+hex = "0.4"
+once_cell = "1"
+wasmer = "4.1.1"
+wasmer-wasi = "3.1.1"
+syn = { version = "*", features = ["full"] }
+quote = "*"
+proc-macro2 = "*"
+futures = "0.3"
+
+[[bin]]
+name = "courtekm"
+path = "src/main.rs"
